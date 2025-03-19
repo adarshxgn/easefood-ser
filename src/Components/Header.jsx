@@ -73,56 +73,59 @@ function ResponsiveAppBar() {
 
                     {/* Mobile menu button */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-                        <IconButton
-                            size="large"
-                            aria-label="open navigation menu"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={handleOpenNavMenu}
-                            color="inherit"
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                            keepMounted
-                            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                            open={Boolean(anchorElNav)}
-                            onClose={handleCloseNavMenu}
-                        >
-                          {[
-    { name: 'Home', link: '/home-page', icon:<IoMdHome style={{paddingRight:'3px'}} size={22} />},
-    { name: 'About', link: '/about', icon: <IoMdInformationCircle style={{paddingRight:'3px'}} size={22}  />  },
-    { name: 'Cart', link: '/cart' }].map((page) => (
-    <MenuItem key={page.name} component={Link} to={page.link} onClick={handleCloseNavMenu}>
-        {page.name === 'Cart' ? (
-            <Badge
-                className='cart-badge'
-                badgeContent={cartCount ? cartCount : '0'}
-                sx={{
-                    '& .MuiBadge-badge': {
-                        color: 'white',
-                        backgroundColor: '#FEAB19'
-                    }
-                }}
-            >
-                <ShoppingCartIcon size={22} style={{paddingRight:'3px'}}  />
-            </Badge>
-        ) : page.icon ? (
-            <>{page.icon}</>
-        ) : null}
-        <Typography textAlign="center" sx={{ ml: page.name === 'Cart' ? 1 : 0 }}>
-            {page.name}
-        </Typography>
-    </MenuItem>
-))}
+                                            <IconButton
+                                                size="large"
+                                                aria-label="open navigation menu"
+                                                aria-controls="menu-appbar"
+                                                aria-haspopup="true"
+                                                onClick={handleOpenNavMenu}
+                                                color="inherit"
+                                                sx={{ visibility: 'visible' }} // Added visibility
+                                            >
+                                                <MenuIcon />
+                                            </IconButton>
+                                            <Menu
+                                                id="menu-appbar"
+                                                anchorEl={anchorElNav}
+                                                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                                keepMounted
+                                                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                                open={Boolean(anchorElNav)}
+                                                onClose={handleCloseNavMenu}
+                                                sx={{ display: 'block' }} // Added display property
+                                            >
+                                              {[
+                        { name: 'Home', link: '/home-page', icon:<IoMdHome style={{paddingRight:'3px'}} size={22} />},
+                        { name: 'History', link: '/history', icon: <IoMdHome style={{paddingRight:'3px'}} size={22} /> },
+                        { name: 'About', link: '/about', icon: <IoMdInformationCircle style={{paddingRight:'3px'}} size={22}  />  },
+                        { name: 'Cart', link: '/cart' }].map((page) => (
+                        <MenuItem key={page.name} component={Link} to={page.link} onClick={handleCloseNavMenu}>
+                            {page.name === 'Cart' ? (
+                                <Badge
+                                    className='cart-badge'
+                                    badgeContent={cartCount ? cartCount : '0'}
+                                    sx={{
+                                        '& .MuiBadge-badge': {
+                                            color: 'white',
+                                            backgroundColor: '#FEAB19'
+                                        }
+                                    }}
+                                >
+                                    <ShoppingCartIcon size={22} style={{paddingRight:'3px'}}  />
+                                </Badge>
+                            ) : page.icon ? (
+                                <>{page.icon}</>
+                            ) : null}
+                            <Typography textAlign="center" sx={{ ml: page.name === 'Cart' ? 1 : 0 }}>
+                                {page.name}
+                            </Typography>
+                        </MenuItem>
+                    ))}
 
-                        </Menu>
-                    </Box>
+                                            </Menu>
+                                        </Box>
 
-                    {/* Logo for mobile */}
+                                        {/* Logo for mobile */}
                     <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', flexGrow: 1 }}>
                         <PiChefHatLight size={30} />
                         <Typography
@@ -155,7 +158,7 @@ function ResponsiveAppBar() {
                     </form> */}
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end' }}>
-                        {['Home', 'About'].map((page) => (
+                        {['Home', 'History', 'About'].map((page) => (
                             <Button
                                 key={page}
                                 component={Link}

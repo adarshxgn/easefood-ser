@@ -1,0 +1,17 @@
+.accordion-button:not(.collapsed) {
+  background-color: #f8f9fa;
+  color: #000;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+  border-color: rgba(0,0,0,.125);
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.75rem;
+}
+
+.badge {
+  padding: 0.5em 1em;
+}

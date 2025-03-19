@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getCheckoutAPI } from "../Service/AllAPI";
+import { getCheckoutAPI, getPaymentDetailsAPI, verifyPaymentAPI } from "../Service/AllAPI";
 import { toast } from "react-toastify";
 import { emptyCartAPI } from "../Service/AllAPI";
 const Payment = () => {
   const location = useLocation();
-  const { table_number, totalprice } = location.state || { table_number: null, totalprice: 0 };
+  const { table_number, totalprice, checkoutResult } = location.state || {};
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const tableID = Number(sessionStorage.getItem("tableId"));
+console.log("checkoutResult",checkoutResult);
 
   const handleEmptyCart = async () => {
       try {
@@ -20,11 +22,9 @@ const Payment = () => {
       }
     };
 
-  const tableID = Number(sessionStorage.getItem("tableId"));
-
   const getPaymentDetails = async () => {
     try {
-      const response = await getCheckoutAPI(tableID);
+      const response = await getCheckoutAPI(checkoutResult);
       console.log("Payment details response:", response);
 
       if (response.status === 200) {
@@ -40,6 +40,81 @@ const Payment = () => {
     }
   };
 
+  const verifyPayment = async (paymentResponse) => {
+    try {
+      const reqBody = {
+        checkout_id: checkoutResult, // Send the whole checkout result
+        order_id: paymentResponse.razorpay_order_id,
+        payment_id: paymentResponse.razorpay_payment_id,
+        razorpay_signature: paymentResponse.razorpay_signature
+      };
+
+      console.log("Verify payment request body:", reqBody); // Debug log
+      console.log(paymentResponse);
+      
+      
+      const response = await verifyPaymentAPI(reqBody, { 
+        "Content-Type": "application/json" 
+      });
+      
+      if (response.status === 200) {
+        console.log("Payment verification successful:", response.data);
+        toast.success(response.data.message || "Payment successful, order placed!");
+        await handleEmptyCart();
+      } else {
+        throw new Error(response.data.error || "Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Payment verification error:", {
+        error: error.response?.data,
+        status: error.response?.status,
+        message: error.message
+      });
+      toast.error(error.response?.data?.error || "Payment verification failed");
+    }
+  };
+
+  const getorderdetails = async () => {
+    try {
+      const reqBody = {     
+        checkout_id: checkoutResult // Send the whole checkout result
+      };
+      
+      console.log("Checkout data being used:", checkoutResult); // Debug log
+      console.log("Sending order creation request:", reqBody);
+      
+      const response = await getPaymentDetailsAPI(reqBody);
+      console.log("Order creation response:", response.data);
+
+      if (response.status === 200) {
+        const options = {
+          key: "rzp_test_v5JbppqXvm3HVl",
+          amount: response.data.amount,
+          currency: response.data.currency,
+          order_id: response.data.order_id,
+          name: "E Mart",
+          description: "Payment for your order",
+          handler: function (paymentResponse) {
+            console.log("Payment response from Razorpay:", paymentResponse); // Debug log
+            verifyPayment(paymentResponse);
+          },
+          // ...rest of your options
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } else {
+        throw new Error(response.data.error || "Failed to create order");
+      }
+    } catch (error) {
+      console.error("Error creating order:", {
+        message: error.message,
+        response: error.response?.data
+      });
+      toast.error(error.message || "Failed to initialize payment!");
+    }
+  };
+
   useEffect(() => {
     getPaymentDetails();
   }, []);
@@ -47,43 +122,17 @@ const Payment = () => {
   console.log("Payment details:", paymentDetails);
 
   const handlePayment = () => {
-    if (!paymentDetails) {
-      toast.error("Payment details are missing. Please try again.");
+    if (!checkoutResult) {
+      toast.error("Checkout details are missing!");
       return;
     }
-
-    if (!window.Razorpay) {
-      toast.error("Razorpay SDK is not loaded. Please try again.");
-      return;
+    
+    try {
+      getorderdetails();
+    } catch (error) {
+      console.error("Payment initialization error:", error);
+      toast.error("Failed to initialize payment");
     }
-
-    const options = {
-      key: "rzp_test_v5JbppqXvm3HVl",
-      amount: totalprice * 100, // Amount in paise
-      currency: "INR",
-      name: "E Mart",
-      description: "Payment for your order",
-      image: "your-logo-url", // Add your logo URL here
-      prefill: {
-        name: "Customer Name", // Replace dynamically if available
-        email: "customer@example.com", // Replace dynamically if available
-      },
-      theme: { color: "#4badeb" },
-      handler: function (response) {
-        console.log("Payment successful", response);
-        toast.success("Payment successful!");
-        handleEmptyCart();
-      },
-      modal: {  
-        ondismiss: function () {
-          console.log("Payment dismissed");
-          toast.error("Payment was cancelled.");
-        },
-      },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.open();
   };
 
   return (
@@ -107,4 +156,4 @@ const Payment = () => {
   );
 };
 
-export default Payment; 
+export default Payment;

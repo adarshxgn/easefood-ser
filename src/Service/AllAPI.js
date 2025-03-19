@@ -39,6 +39,17 @@ export const emptyCartAPI = async (tableID) => {
 export const addCheckoutAPI = async (reqBody, reqHeader) => {
     return await axios.post(`${SERVER_URL}/api/checkout/`, reqBody, { headers: reqHeader });
   };
-export const getCheckoutAPI = async (tableID) => {
-    return await axios.get(`${SERVER_URL}/api/checkout/${tableID}/`); 
+export const getCheckoutAPI = async (id) => {
+    return await axios.get(`${SERVER_URL}/api/checkout/${id}/`); 
+}
+export const verifyPaymentAPI = async (reqBody, reqHeader) => {
+    return await axios.post(`${SERVER_URL}/verify-payment/`, reqBody, { headers: reqHeader });
+}
+export const getPaymentDetailsAPI = async (reqBody) => {
+    const reqHeader = { "Content-Type": "application/json" };
+    return await axios.post(`${SERVER_URL}/api/payment/`, reqBody, { headers: reqHeader });
+}  
+
+export const getallordersAPI = async(pin) => {
+    return await commonAPI("GET",`${SERVER_URL}/api/orders/${pin}/`,"","")
 }

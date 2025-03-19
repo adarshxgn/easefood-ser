@@ -8,6 +8,7 @@ import { getCartAPI, incrementCartItemAPI, emptyCartAPI, addCheckoutAPI } from "
 import { SERVER_URL } from "../Service/ServerUrl";
 import { cartCountContext } from "../Context API/ContextShare";
 import { toast } from "react-toastify";
+import Form from "react-bootstrap/Form";
 
 function CartPage() {
   const tableID = Number(sessionStorage.getItem("tableId"));
@@ -15,6 +16,7 @@ function CartPage() {
   const [allCartFoods, setAllCartFoods] = useState([]);
   const { cartCount, setCartCount } = useContext(cartCountContext);
   const [totalprice, setTotalPrice] = useState(0);
+  const [descriptions, setDescriptions] = useState("");
 
   useEffect(() => {
     handleGetCart();
@@ -61,15 +63,24 @@ function CartPage() {
     try {
       const reqHeader = { "Content-Type": "application/json" };
       const reqBody = {
-        table_number: table_number,
+        table_number: table_number, 
         total_price: totalprice,
+        descriptions: descriptions // Add descriptions to request body
       };
       const result = await addCheckoutAPI(reqBody, reqHeader);
+      
       if (result.status === 201) {
+        sessionStorage.setItem('checkoutData', JSON.stringify(result.data));
         toast.success("Checkout successful");
-        console.log("Checkout result:", result.data);
         setCartCount(0);
-        navigate("/payment", { state: { table_number, totalprice } });
+        navigate("/payment", {
+          state: {
+            table_number,
+            totalprice,
+            checkoutResult: result.data.id,
+            descriptions // Pass descriptions to payment page
+          }
+        });
       }
     } catch (error) {
       console.error("Error during checkout:", error.response?.data || error.message);
@@ -138,6 +149,20 @@ function CartPage() {
                   <p>Price ({allCartFoods.length}) items</p>
                   <p>₹{totalprice}</p>
                 </div>
+                {/* Add textarea here */}
+                <div className="mb-3">
+                  <Form.Group>
+                    <Form.Label>Special Instructions</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder="Add any special notes for your order..."
+                      value={descriptions}
+                      onChange={(e) => setDescriptions(e.target.value)}
+                      className="mb-3"
+                    />
+                  </Form.Group>
+                </div>  
                 <Button onClick={handleCheckout} className="checkout-Btn">Checkout</Button>
               </Card.Body>
             </Card>

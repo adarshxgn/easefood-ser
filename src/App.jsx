@@ -10,6 +10,7 @@ import TableTrackPage from './Pages/TableTrackPage'
 import { useContext } from 'react'
 import { pinAuthentication } from './Context API/ContextShare'
 import Payment from './Pages/Payment'
+import History from './Pages/History'
 
 function App() {
   const {isAuthorized,setIsAuthorized} = useContext(pinAuthentication)
@@ -23,6 +24,7 @@ function App() {
   <Route path='/about' element={<AboutPage/>}/>
   <Route path='/cart' element={<CartPage/>}/>
   <Route path='payment' element={<Payment/>}/>
+  <Route path='history' element={<History/>}/>
 </Routes>
 <Footer/>
     </>
