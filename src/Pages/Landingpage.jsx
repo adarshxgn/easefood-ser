@@ -27,10 +27,11 @@ function Landingpage() {
             if (response.status === 200) {
                 toast.success('PIN Verified');
                 sessionStorage.setItem("verifiedPin", pin)
+                sessionStorage.setItem("category", response.data.tables[0].seller_category)
                 setTimeout(() => {
                     navigate('/table-track-page');
                     setPin("");
-                }, 2000);
+                }, 2000);   
             } else {
                 toast.error('Incorrect "PIN". Try again!');
             }

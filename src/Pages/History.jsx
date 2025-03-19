@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getallordersAPI } from '../Service/AllAPI';
+import { getAllOdersAPI } from '../Service/AllAPI';
 import { Card, Container, Table, Accordion } from 'react-bootstrap';
 import { format } from 'date-fns';
 import './History.css';
@@ -8,28 +8,34 @@ const History = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const pin = sessionStorage.getItem('pin');
+  const pin = sessionStorage.getItem('verifiedPin');
+  console.log(pin);
+  const category = sessionStorage.getItem("category")
+  
 
   useEffect(() => {
     const fetchOrders = async () => {
-      try {
-        const response = await getallordersAPI(pin);
-        if (response.status === 200) {
-          setOrders(response.data);
+        try {
+            const pin = sessionStorage.getItem("verifiedPin"); 
+            if (!pin) {
+                console.error("Seller PIN not found");
+                setError("Seller PIN not found");
+                setLoading(false);
+                return;
+            }
+            
+            const response = await getAllOdersAPI(pin);
+            setOrders(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            setError("Failed to fetch orders");
+            setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setError('Failed to load orders');
-      } finally {
-        setLoading(false);
-      }
     };
 
-    if (pin) {
-      fetchOrders();
-    }
-  }, [pin]);
-
+    fetchOrders();
+}, []); 
   if (loading) return <div className="text-center mt-5">Loading orders...</div>;
   if (error) return <div className="text-center mt-5 text-danger">{error}</div>;
   if (!orders.length) return <div className="text-center mt-5">No orders found</div>;
@@ -43,7 +49,7 @@ const History = () => {
             <Accordion.Header>
               <div className="d-flex justify-content-between w-100 me-3">
                 <span>Order #{order.id}</span>
-                <span>Table #{order.table_number}</span>
+                <span>{category=="Hotel"?"Table":"Room"} #{order.table_number}</span>
                 <span>₹{order.total_price}</span>
                 <span>{format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}</span>
               </div>

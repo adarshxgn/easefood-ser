@@ -15,6 +15,7 @@ function TableTrackPage() {
   const [loading,setLoading] = useState(false)
   const {tableId,setTableId} = useContext(reservationtableId)
   const pin = sessionStorage.getItem("verifiedPin")
+  const category = sessionStorage.getItem("category")
   
   useEffect(() => {
     getTableDatas()
@@ -32,7 +33,6 @@ function TableTrackPage() {
       setLoading(false)
     }
   }
- const seller_category = getTables[0]?.seller_category
  
   const choosetable = (tableData) => {
     setableNo(tableData.table_number) 
@@ -59,7 +59,7 @@ function TableTrackPage() {
 
   return (
     <div className="mb-5">
-          <h3 className="text-center Logo mt-3"> {seller_category=="Hotel"? <h3>Reserve Your Table</h3>:<h3>Select Your Room</h3>}</h3>
+          <h3 className="text-center Logo mt-3"> {category=="Hotel"? <h3>Reserve Your Table</h3>:<h3>Select Your Room</h3>}</h3>
       {
         loading?(
           <div className="d-flex justify-content-center align-items-center" style={{ height: '60vh' }}>
@@ -72,7 +72,7 @@ function TableTrackPage() {
             getTables?.length > 0 ? getTables.map((table,index) => (
               <Col key={index} xs={6} sm={4} md={3} lg={2} className="d-flex justify-content-center">
               {
-                seller_category=="Hotel"?
+                category=="Hotel"?
                 <div className="table-container">
                 {/* Top Chair */}
                 {tableNo==table.table_number?

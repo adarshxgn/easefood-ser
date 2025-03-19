@@ -50,6 +50,6 @@ export const getPaymentDetailsAPI = async (reqBody) => {
     return await axios.post(`${SERVER_URL}/api/payment/`, reqBody, { headers: reqHeader });
 }  
 
-export const getallordersAPI = async(pin) => {
-    return await commonAPI("GET",`${SERVER_URL}/api/orders/${pin}/`,"","")
-}
+export const getAllOdersAPI = async (pin) => {
+    return await commonAPI("GET", `${SERVER_URL}/orders/${pin}/`, null, "")
+  }
