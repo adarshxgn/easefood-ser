@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // Add useNavigate
 import { getCheckoutAPI, getPaymentDetailsAPI, verifyPaymentAPI } from "../Service/AllAPI";
 import { toast } from "react-toastify";
 import { emptyCartAPI } from "../Service/AllAPI";
 const Payment = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // Add this line
   const { table_number, totalprice, checkoutResult } = location.state || {};
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,10 @@ console.log("checkoutResult",checkoutResult);
         console.log("Payment verification successful:", response.data);
         toast.success(response.data.message || "Payment successful, order placed!");
         await handleEmptyCart();
+        // Add redirect after successful payment
+        setTimeout(() => {
+          navigate('/history');
+        }, 2000); // Wait for 2 seconds to show success message
       } else {
         throw new Error(response.data.error || "Payment verification failed");
       }

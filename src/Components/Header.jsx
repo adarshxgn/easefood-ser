@@ -14,17 +14,20 @@ import Badge from '@mui/material/Badge';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { PiChefHatLight } from "react-icons/pi";
 import Tooltip from '@mui/material/Tooltip';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { orange } from '@mui/material/colors';
 import { cartCountContext } from '../Context API/ContextShare';
 import { IoMdInformationCircle } from "react-icons/io";
 import { IoMdHome } from "react-icons/io";
+import { FaHistory } from "react-icons/fa";
+import { CiLogout } from "react-icons/ci";
 import { ToastContainer, toast } from 'react-toastify';
 
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function ResponsiveAppBar() {
+    const navigate = useNavigate();
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const {cartCount,setCartCount} = useContext(cartCountContext)
@@ -44,6 +47,13 @@ function ResponsiveAppBar() {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const handleLogout = () => {
+        // Clear all session storage
+        sessionStorage.clear();
+        // Redirect to landing page
+        navigate('/');
     };
 
     return (
@@ -96,10 +106,17 @@ function ResponsiveAppBar() {
                                             >
                                               {[
                         { name: 'Home', link: '/home-page', icon:<IoMdHome style={{paddingRight:'3px'}} size={22} />},
-                        { name: 'History', link: '/history', icon: <IoMdHome style={{paddingRight:'3px'}} size={22} /> },
+                        { name: 'History', link: '/history', icon: <FaHistory style={{paddingRight:'3px'}} size={22} /> },
                         { name: 'About', link: '/about', icon: <IoMdInformationCircle style={{paddingRight:'3px'}} size={22}  />  },
-                        { name: 'Cart', link: '/cart' }].map((page) => (
-                        <MenuItem key={page.name} component={Link} to={page.link} onClick={handleCloseNavMenu}>
+                        { name: 'Cart', link: '/cart' },
+                        { name: 'Logout', onClick: handleLogout, icon: <CiLogout style={{paddingRight:'3px'}} size={22} /> }
+                    ].map((page) => (
+                        <MenuItem 
+                            key={page.name} 
+                            component={page.link ? Link : 'button'} 
+                            to={page.link} 
+                            onClick={page.onClick || handleCloseNavMenu}
+                        >
                             {page.name === 'Cart' ? (
                                 <Badge
                                     className='cart-badge'
@@ -190,6 +207,22 @@ function ResponsiveAppBar() {
                                 <ShoppingCartIcon style={{ fontSize: '1.3rem' }} />
                             </Badge>
                             <Typography sx={{ ml: 1, fontWeight: '700', fontSize: '13px', lineHeight: '1.75', letterSpacing: '0.02857em' }}>Cart</Typography>
+                        </Button>
+                        <Button
+                            onClick={handleLogout}
+                            sx={{
+                                my: 2,
+                                color: 'black',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                '&:hover': {
+                                    backgroundColor: '#FEAB19',
+                                    color: 'white'
+                                }
+                            }}
+                            className='NavHover'
+                        >
+                            Logout
                         </Button>
                     </Box>
 
