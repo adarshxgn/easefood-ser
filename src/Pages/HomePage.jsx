@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, Row, Card, ListGroup, Badge } from 'react-bootstrap';
 import CategoryCard from '../Components/CategoryCard';
 import FoodCard from '../Components/FoodCard';
-import { getAllCategoriesAPI, getAllMenuAPI } from '../Service/AllAPI';
+import Timer from '../Components/Timer';
+import { getAllCategoriesAPI, getAllMenuAPI, getAllOdersAPI } from '../Service/AllAPI';
+import { format, differenceInMinutes } from 'date-fns';
 import Spinner from 'react-bootstrap/Spinner';
+import { Clock, CheckCircle, Utensils } from 'lucide-react';
 
 function HomePage() { 
   const pin = sessionStorage.getItem("verifiedPin");
   const [allcategories, setAllcategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [tableMenu, setTableMenu] = useState([]);
-  const [addedItems, setAddedItems] = useState([]); // Track added items
+  const [addedItems, setAddedItems] = useState([]); 
   const [filteredMenu, setFilteredMenu] = useState([]); 
-
-  console.log(allcategories);
-  console.log(tableMenu);
+  const [latestOrder, setLatestOrder] = useState(null);
+  const tableId = sessionStorage.getItem("tableId")
   
   const handleFilter = (categoryName) => {
     if (!categoryName) {
@@ -78,6 +80,37 @@ function HomePage() {
     }
   };
 
+  // Fetch latest order
+  const getLatestOrder = async () => {
+    try {
+      const response = await getAllOdersAPI(pin);
+      if (response.data && response.data.length > 0) {
+        // Filter orders for current table
+        const tableOrders = response.data.filter(order => 
+          order.table_number === parseInt(tableId)  
+        );  
+        
+        if (tableOrders.length > 0) {
+          // Get the most recent order
+          const sortedOrders = tableOrders.sort((a, b) => 
+            new Date(b.created_at) - new Date(a.created_at)
+          );
+          setLatestOrder(sortedOrders[0]);
+        }
+      }
+      console.log(response);
+      
+    } catch (error) {
+      console.error("Error fetching latest order:", error);
+    }
+  };
+
+  useEffect(() => {
+    getLatestOrder();
+    const interval = setInterval(getLatestOrder, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [tableId]);
+
   return (
     <div>
       {isLoading ? (
@@ -88,7 +121,7 @@ function HomePage() {
         <Container>
           <CategoryCard allcategories={allcategories} handleFilter={handleFilter} clearFilters={clearFilters} />
           <hr />
-          <Row  className="g-4 mt-4 justify-content-center">
+          <Row className="g-4 mt-4 justify-content-center">
             {filteredMenu.length > 0 ? (
               filteredMenu.map((menuItem) => (
                 <Col key={menuItem.id} xs={12} sm={6} md={6} lg={4} xl={3} className="mb-4">
@@ -99,6 +132,90 @@ function HomePage() {
               <div className="fw-bolder text-center">Nothing to display!!</div>
             )}
           </Row>
+          {latestOrder && (
+            <Card 
+              className="mb-4 shadow-lg border-0" 
+              style={{
+                background: 'linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%)',
+                borderRadius: '15px',
+                overflow: 'hidden'
+              }}
+            >
+              <Card.Body className="p-4">
+                {/* Order Header */}
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <div className="d-flex align-items-center">
+                    <Utensils className="me-3 text-primary" size={32} />
+                    <div>
+                      <h4 className="mb-1 fw-bold text-dark">Order #{latestOrder.id}</h4>
+                      <p className="text-muted mb-0">
+                        <Clock size={16} className="me-2 text-secondary" />
+                        Ordered at: {format(new Date(latestOrder.created_at), 'HH:mm')}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Status and Timer */}
+                  <div className="text-end">
+                    <Badge 
+                      bg={latestOrder.status === 'Delivered' ? 'success' : 'warning'} 
+                      className="mb-2 d-inline-flex align-items-center"
+                    >
+                      <CheckCircle size={16} className="me-2" />
+                      Cooking
+                    </Badge>
+                    <div className="timer-badge">
+                      <Timer initialMinutes={30} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <Card 
+                  className="border-0 shadow-sm mb-3" 
+                  style={{ 
+                    background: 'white', 
+                    borderRadius: '10px' 
+                  }}
+                >
+                  <Card.Body>
+                    <h5 className="mb-3 text-primary">
+                      <Utensils size={20} className="me-2" />
+                      Order Items
+                    </h5>
+                    <ListGroup variant="flush">
+                      {latestOrder.items && latestOrder.items.map((item, index) => (
+                        <ListGroup.Item 
+                          key={index} 
+                          className="d-flex justify-content-between align-items-center px-0 py-2"
+                        >
+                          <div>
+                            <span className="fw-bold">{item.food_name}</span>
+                            <p className="text-muted mb-0">
+                              Quantity: {item.quantity}
+                            </p>
+                          </div>
+                          <Badge bg="secondary" pill>
+                            ${parseFloat(item.price).toFixed(2)}
+                          </Badge>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </Card.Body>
+                </Card>
+
+                {/* Total Price */}
+                <div className="text-end">
+                  <h5 className="mb-0">
+                    Total: 
+                    <span className="text-primary ms-2 fw-bold">
+                      ${parseFloat(latestOrder.total_price).toFixed(2)}
+                    </span>
+                  </h5>
+                </div>
+              </Card.Body>
+            </Card>
+          )}
         </Container>
       )}
     </div>

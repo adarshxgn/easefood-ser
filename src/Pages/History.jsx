@@ -9,14 +9,18 @@ const History = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const pin = sessionStorage.getItem('verifiedPin');
-  console.log(pin);
   const category = sessionStorage.getItem("category")
+  const tableId = sessionStorage.getItem("tableId");
+  const tableNumber = sessionStorage.getItem("tableNumber")
+  
   
 
   useEffect(() => {
     const fetchOrders = async () => {
         try {
             const pin = sessionStorage.getItem("verifiedPin"); 
+            const tableId = sessionStorage.getItem("tableId");
+            
             if (!pin) {
                 console.error("Seller PIN not found");
                 setError("Seller PIN not found");
@@ -25,7 +29,11 @@ const History = () => {
             }
             
             const response = await getAllOdersAPI(pin);
-            setOrders(response.data);
+            // Filter orders based on tableId if it exists
+            const filteredOrders = tableId 
+                ? response.data.filter(order => order.table_number === parseInt(tableId))
+                : response.data;
+            setOrders(filteredOrders);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching orders:", error);
@@ -38,8 +46,10 @@ const History = () => {
 }, []); 
   if (loading) return <div className="text-center mt-5">Loading orders...</div>;
   if (error) return <div className="text-center mt-5 text-danger">{error}</div>;
-  if (!orders.length) return <div className="text-center mt-5">No orders found</div>;
+  if (!orders.length) return <div className="text-center mt-5">No orders found</div>;4
 
+  console.log(orders);
+  
   return (
     <Container className="my-5">
       <h2 className="text-center mb-4">Order History</h2>
@@ -49,7 +59,7 @@ const History = () => {
             <Accordion.Header>
               <div className="d-flex justify-content-between w-100 me-3">
                 <span>Order #{order.id}</span>
-                <span>{category=="Hotel"?"Table":"Room"} #{order.table_number}</span>
+                <span>{category=="Hotel"?"Table":"Room"} #{tableNumber}</span>
                 <span>₹{order.total_price}</span>
                 <span>{format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}</span>
               </div>

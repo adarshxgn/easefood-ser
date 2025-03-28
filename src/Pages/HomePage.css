@@ -1,0 +1,31 @@
+.latest-order-card {
+  background-color: #f8f9fa;
+  border-left: 4px solid #0d6efd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timer-text {
+  color: #dc3545;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 8px 16px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
+
+.badge {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+.table-info {
+  background-color: #e2f0fb !important;
+}
+
+.text-end {
+  text-align: right !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}       

@@ -64,7 +64,7 @@ console.log("checkoutResult",checkoutResult);
         await handleEmptyCart();
         // Add redirect after successful payment
         setTimeout(() => {
-          navigate('/history');
+          navigate('/home-page'); // 
         }, 2000); // Wait for 2 seconds to show success message
       } else {
         throw new Error(response.data.error || "Payment verification failed");
@@ -147,7 +147,7 @@ console.log("checkoutResult",checkoutResult);
             alt="Success Tick"
             style={{ width: "100px", height: "100px", marginBottom: "20px" }}
         />
-      <h1>Order Successful</h1>
+      <h1>Order Pending..</h1>
       {loading ? (
         <p>Loading payment details...</p>
       ) : error ? (
