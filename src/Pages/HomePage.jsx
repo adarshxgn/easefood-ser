@@ -3,7 +3,7 @@ import { Col, Container, Row, Card, ListGroup, Badge } from 'react-bootstrap';
 import CategoryCard from '../Components/CategoryCard';
 import FoodCard from '../Components/FoodCard';
 import Timer from '../Components/Timer';
-import { getAllCategoriesAPI, getAllMenuAPI, getAllOdersAPI } from '../Service/AllAPI';
+import { getAllCategoriesAPI, getAllMenuAPI, getOrderDashboardAPI } from '../Service/AllAPI';
 import { format, differenceInMinutes } from 'date-fns';
 import Spinner from 'react-bootstrap/Spinner';
 import { Clock, CheckCircle, Utensils } from 'lucide-react';
@@ -83,7 +83,7 @@ function HomePage() {
   // Fetch latest order
   const getLatestOrder = async () => {
     try {
-      const response = await getAllOdersAPI(pin);
+      const response = await getOrderDashboardAPI(pin);
       if (response.data && response.data.length > 0) {
         // Filter orders for current table
         const tableOrders = response.data.filter(order => 

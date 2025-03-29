@@ -53,3 +53,7 @@ export const getPaymentDetailsAPI = async (reqBody) => {
 export const getAllOdersAPI = async (pin) => {
     return await commonAPI("GET", `${SERVER_URL}/orders/${pin}/`, null, "")
   }
+
+  export const getOrderDashboardAPI = async (pin) => {
+    return await commonAPI("GET", `${SERVER_URL}/orders-dashboard/${pin}/`, null, "");
+  }

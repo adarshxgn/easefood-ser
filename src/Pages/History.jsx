@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllOdersAPI } from '../Service/AllAPI';
+import { getAllOdersAPI, getOrderDashboardAPI } from '../Service/AllAPI';
 import { Card, Container, Table, Accordion } from 'react-bootstrap';
 import { format } from 'date-fns';
 import './History.css';
@@ -16,34 +16,46 @@ const History = () => {
   
 
   useEffect(() => {
-    const fetchOrders = async () => {
-        try {
-            const pin = sessionStorage.getItem("verifiedPin"); 
-            const tableId = sessionStorage.getItem("tableId");
-            
-            if (!pin) {
-                console.error("Seller PIN not found");
-                setError("Seller PIN not found");
-                setLoading(false);
-                return;
-            }
-            
-            const response = await getAllOdersAPI(pin);
-            // Filter orders based on tableId if it exists
-            const filteredOrders = tableId 
-                ? response.data.filter(order => order.table_number === parseInt(tableId))
-                : response.data;
-            setOrders(filteredOrders);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching orders:", error);
-            setError("Failed to fetch orders");
-            setLoading(false);
+    const fetchAllOrderData = async () => {
+      try {
+        const pin = sessionStorage.getItem("verifiedPin");
+        const tableId = sessionStorage.getItem("tableId");
+        
+        if (!pin) {
+          console.error("Seller PIN not found");
+          setError("Seller PIN not found");
+          setLoading(false);
+          return;
         }
+  
+        // Fetch data from both APIs
+        const [ordersResponse, pendingOrdersResponse] = await Promise.all([
+          getAllOdersAPI(pin),
+          getOrderDashboardAPI(pin)
+        ]);
+  
+        // Combine the data from both responses
+        const allOrders = [
+          ...ordersResponse.data,
+          ...pendingOrdersResponse.data
+        ];
+  
+        // Apply table filtering if needed
+        const filteredOrders = tableId
+          ? allOrders.filter(order => order.table_number === parseInt(tableId))
+          : allOrders;
+  
+        setOrders(filteredOrders);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Failed to fetch orders");
+        setLoading(false);
+      }
     };
-
-    fetchOrders();
-}, []); 
+  
+    fetchAllOrderData();
+  }, []); 
   if (loading) return <div className="text-center mt-5">Loading orders...</div>;
   if (error) return <div className="text-center mt-5 text-danger">{error}</div>;
   if (!orders.length) return <div className="text-center mt-5">No orders found</div>;4
