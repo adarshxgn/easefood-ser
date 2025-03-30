@@ -13,8 +13,6 @@ const History = () => {
   const tableId = sessionStorage.getItem("tableId");
   const tableNumber = sessionStorage.getItem("tableNumber")
   
-  
-
   useEffect(() => {
     const fetchAllOrderData = async () => {
       try {
@@ -40,10 +38,14 @@ const History = () => {
           ...pendingOrdersResponse.data
         ];
   
-        // Apply table filtering if needed
-        const filteredOrders = tableId
-          ? allOrders.filter(order => order.table_number === parseInt(tableId))
-          : allOrders;
+        // Apply table filtering if needed and filter out "Completed" orders
+        const filteredOrders = allOrders
+          .filter(order => 
+            // Remove orders with status "Completed"
+            order.status !== "Completed" && 
+            // Apply table filtering if tableNumber exists
+            (tableNumber ? order.table_number === parseInt(tableNumber) : true)
+          );
   
         setOrders(filteredOrders);
         setLoading(false);
@@ -56,12 +58,11 @@ const History = () => {
   
     fetchAllOrderData();
   }, []); 
+
   if (loading) return <div className="text-center mt-5">Loading orders...</div>;
   if (error) return <div className="text-center mt-5 text-danger">{error}</div>;
-  if (!orders.length) return <div className="text-center mt-5">No orders found</div>;4
+  if (!orders.length) return <div className="text-center mt-5">No orders found</div>;
 
-  console.log(orders);
-  
   return (
     <Container className="my-5">
       <h2 className="text-center mb-4">Order History</h2>

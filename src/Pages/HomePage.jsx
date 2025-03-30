@@ -17,6 +17,7 @@ function HomePage() {
   const [filteredMenu, setFilteredMenu] = useState([]); 
   const [latestOrder, setLatestOrder] = useState(null);
   const tableId = sessionStorage.getItem("tableId")
+  const tableNumber = sessionStorage.getItem("tableNumber")
   
   const handleFilter = (categoryName) => {
     if (!categoryName) {
@@ -87,7 +88,7 @@ function HomePage() {
       if (response.data && response.data.length > 0) {
         // Filter orders for current table
         const tableOrders = response.data.filter(order => 
-          order.table_number === parseInt(tableId)  
+          order.table_number === parseInt(tableNumber)  
         );  
         
         if (tableOrders.length > 0) {
